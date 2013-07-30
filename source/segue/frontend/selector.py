@@ -120,7 +120,7 @@ class SelectorWidget(QtGui.QFrame):
         '''
         matches = self.list_widget.findItems(
             item,
-            QtCore.Qt.MatchFixedString | QtCore.Qt.CaseSensitive
+            QtCore.Qt.MatchFixedString & QtCore.Qt.CaseSensitive
         )
         
         if matches:
