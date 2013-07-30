@@ -6,6 +6,7 @@
 from PySide import QtGui
 
 from .selector import SelectorWidget
+from .options import OptionsWidget
 
 
 class ExporterWidget(QtGui.QWidget):
@@ -25,7 +26,7 @@ class ExporterWidget(QtGui.QWidget):
         self.selector_widget = SelectorWidget(host=self.host)
         self.layout().addWidget(self.selector_widget)
         
-        self.options_widget = QtGui.QWidget()
+        self.options_widget = OptionsWidget(host=self.host)
         self.layout().addWidget(self.options_widget)
         
         self.export_button = QtGui.QPushButton('Export')
