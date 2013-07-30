@@ -5,6 +5,8 @@
 
 from PySide import QtGui, QtCore
 
+from . import icon
+
 
 class SelectDialog(QtGui.QDialog):
     '''Add nodes to selection.'''
@@ -64,10 +66,15 @@ class SelectorWidget(QtGui.QWidget):
         )
         self.layout().addWidget(self.list_widget, 0, 0, 3, 1)
         
-        self.add_button = QtGui.QPushButton('Add')
+        self.add_button = QtGui.QPushButton()
+        self.add_button.setToolTip('Select items to add to list.')
+        self.add_button.setIcon(QtGui.QPixmap(':icon_plus'))
+
         self.layout().addWidget(self.add_button, 0, 1)
         
-        self.remove_button = QtGui.QPushButton('Remove')
+        self.remove_button = QtGui.QPushButton()
+        self.remove_button.setToolTip('Remove selected items from list.')
+        self.remove_button.setIcon(QtGui.QPixmap(':icon_minus'))
         self.layout().addWidget(self.remove_button, 1, 1)
         
         self.layout().setRowStretch(2, 1)

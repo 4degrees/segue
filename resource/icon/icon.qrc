@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource>
+        <file alias="icon_plus">plus.png</file>
+        <file alias="icon_minus">minus.png</file>
+    </qresource>
+</RCC>
