@@ -5,6 +5,8 @@
 
 from PySide import QtGui
 
+from .selector import SelectorWidget
+
 
 class ExporterWidget(QtGui.QWidget):
     '''Manage exporting.'''
@@ -19,7 +21,7 @@ class ExporterWidget(QtGui.QWidget):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QVBoxLayout())
         
-        self.selector_widget = QtGui.QWidget()
+        self.selector_widget = SelectorWidget()
         self.layout().addWidget(self.selector_widget)
         
         self.options_widget = QtGui.QWidget()
