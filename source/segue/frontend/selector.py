@@ -38,7 +38,7 @@ class SelectDialog(QtGui.QDialog):
         self.cancel_button.clicked.connect(self.reject)
 
 
-class SelectorWidget(QtGui.QWidget):
+class SelectorWidget(QtGui.QFrame):
     '''Manage selection of nodes.'''
     
     added = QtCore.Signal(list)

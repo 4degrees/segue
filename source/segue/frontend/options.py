@@ -6,7 +6,7 @@
 from PySide import QtGui, QtCore
 
 
-class OptionsWidget(QtGui.QWidget):
+class OptionsWidget(QtGui.QFrame):
     '''Manage export options.'''
     
     def __init__(self, host, parent=None):
@@ -19,7 +19,7 @@ class OptionsWidget(QtGui.QWidget):
     def build(self):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QGridLayout())
-
+        
         self.frame_range_label = QtGui.QLabel('Range')
         self.layout().addWidget(self.frame_range_label, 0, 0)
         

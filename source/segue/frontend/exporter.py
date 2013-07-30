@@ -22,11 +22,17 @@ class ExporterWidget(QtGui.QWidget):
     def build(self):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QVBoxLayout())
-        
+
         self.selector_widget = SelectorWidget(host=self.host)
+        self.selector_widget.setFrameStyle(
+            QtGui.QFrame.StyledPanel
+        )
         self.layout().addWidget(self.selector_widget)
         
         self.options_widget = OptionsWidget(host=self.host)
+        self.options_widget.setFrameStyle(
+            QtGui.QFrame.StyledPanel
+        )
         self.layout().addWidget(self.options_widget)
         
         self.export_button = QtGui.QPushButton('Export')
