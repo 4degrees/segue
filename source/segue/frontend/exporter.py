@@ -11,9 +11,10 @@ from .selector import SelectorWidget
 class ExporterWidget(QtGui.QWidget):
     '''Manage exporting.'''
     
-    def __init__(self, parent=None):
-        '''Initialise with *parent*.'''
+    def __init__(self, host, parent=None):
+        '''Initialise with *host* application and *parent*.'''
         super(ExporterWidget, self).__init__(parent=parent)
+        self.host = host
         self.build()
         self.post_build()
         
@@ -21,7 +22,7 @@ class ExporterWidget(QtGui.QWidget):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QVBoxLayout())
         
-        self.selector_widget = SelectorWidget()
+        self.selector_widget = SelectorWidget(host=self.host)
         self.layout().addWidget(self.selector_widget)
         
         self.options_widget = QtGui.QWidget()

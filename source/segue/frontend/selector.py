@@ -42,9 +42,15 @@ class SelectorWidget(QtGui.QWidget):
     added = QtCore.Signal(list)
     removed = QtCore.Signal(list)
 
-    def __init__(self, parent=None):
-        '''Initialise with *parent*.'''
+    def __init__(self, host, parent=None):
+        '''Initialise with *host* application and *parent*.
+        
+        *host* should provide a get_selection() method that returns the current
+        selection as a list of strings.
+        
+        '''
         super(SelectorWidget, self).__init__(parent=parent)
+        self.host = host
         self.build()
         self.post_build()
         
@@ -88,7 +94,7 @@ class SelectorWidget(QtGui.QWidget):
         self.select_dialog.hide()
         
         # TODO: Replace dummy data.
-        items = ['foo', 'bar', 'baz']
+        items = self.host.get_selection()
         self.add(items)
         
     def _on_remove(self):
