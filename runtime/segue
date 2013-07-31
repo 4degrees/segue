@@ -1,0 +1,23 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
+# :license: See LICENSE.txt.
+
+import os
+import runpy
+
+PACKAGE = 'segue'
+
+try:
+    run_globals = runpy.run_module(PACKAGE,
+                                   run_name='__main__',
+                                   alter_sys=True)
+
+    executed = os.path.splitext(os.path.basename(run_globals['__file__']))[0]
+    if executed != '__main__':
+        raise ImportError('Executed {0} instead of __main__'.format(executed))
+
+except ImportError:
+    runpy.run_module('{0}.__main__'.format(PACKAGE),
+                     run_name='__main__',
+                     alter_sys=True)
+
