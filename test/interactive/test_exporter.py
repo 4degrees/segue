@@ -4,6 +4,7 @@
 
 import os
 import sys
+import time
 
 from PySide import QtGui
 
@@ -27,6 +28,9 @@ class MockHost(Host):
     def save(self):
         '''Export.'''
         print 'Export.'''
+        for index in range(10):
+            print 10 - index
+            time.sleep(1)
 
 
 if __name__ == '__main__':
