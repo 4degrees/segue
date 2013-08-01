@@ -2,15 +2,27 @@
 # :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
 # :license: See LICENSE.txt.
 
+from __future__ import absolute_import
+
 import os
 import errno
 import tempfile
 import operator
 import json
 
+import maya.utils
 import pymel.core
 
 from .base import Host
+
+# Add in a mock executeInMainThreadWithResult function if not defined (as in the
+# case when running Maya in batch mode).
+try:
+    _call = maya.utils.executeInMainThreadWithResult
+except AttributeError:
+    def _call(command, *args, **kw):
+        '''Call *command* with *args* and *kw* and return result.'''
+        return command(*args, **kw)
 
 
 class MayaHost(Host):
@@ -18,19 +30,19 @@ class MayaHost(Host):
     
     def get_selection(self):
         '''Return the current selection as a list of ids.'''
-        selected = pymel.core.ls(selection=True)
+        selected = _call(pymel.core.ls, selection=True)
         
         items = []
         for entry in selected:
-            items.append(entry.fullPath())
+            items.append(_call(entry.fullPath))
         
         return items
     
     def get_frame_range(self):
         '''Return the current frame range as a tuple of (start, stop).'''
         return (
-            pymel.core.playbackOptions(query=True, minTime=True),
-            pymel.core.playbackOptions(query=True, maxTime=True)
+            _call(pymel.core.playbackOptions, query=True, minTime=True),
+            _call(pymel.core.playbackOptions, query=True, maxTime=True)
         )
     
     def save(self, selection=None, source=None, target=None,
@@ -56,14 +68,18 @@ class MayaHost(Host):
         '''
         # Open source if provided.
         if source is not None:
-            pymel.core.openFile(source, force=True)
+            _call(pymel.core.openFile, source, force=True)
         
         # Ensure necessary plugins loaded
-        if not pymel.core.pluginInfo('objExport', query=True, loaded=True):
-            pymel.core.loadPlugin('objExport')
+        if not _call(
+            pymel.core.pluginInfo, 'objExport', query=True, loaded=True
+        ):
+            _call(pymel.core.loadPlugin, 'objExport')
         
-        if not pymel.core.pluginInfo('AbcExport', query=True, loaded=True):
-            pymel.core.loadPlugin('AbcExport')
+        if not _call(
+            pymel.core.pluginInfo, 'AbcExport', query=True, loaded=True
+        ):
+            _call(pymel.core.loadPlugin, 'AbcExport')
         
         # Check selection
         if selection is None:
@@ -97,20 +113,20 @@ class MayaHost(Host):
         package_path = os.path.join(target, 'package.json')
         
         # Need to select nodes for export so maintain current selection if any.
-        previous_selection = pymel.core.ls(selection=True)
+        previous_selection = _call(pymel.core.ls, selection=True)
         
         try:
-            pymel.core.select(selection, replace=True)
+            _call(pymel.core.select, selection, replace=True)
     
             # Export obj for reference (to preserve groups)
-            pymel.core.exportSelected(
+            _call(pymel.core.exportSelected, 
                 reference_path, type='OBJexport', force=True,
                 preserveReferences=True,
                 options='groups=1;ptgroups=1;materials=0;smoothing=0;normals=1'
             )
             
             # Export alembic cache
-            pymel.core.select(selection, hierarchy=True, replace=True)
+            _call(pymel.core.select, selection, hierarchy=True, replace=True)
             
             options = []
             for entry in selection:
@@ -121,7 +137,7 @@ class MayaHost(Host):
             options.append('-stripNamespaces')
             options.append('-file {0}'.format(cache_path))
             
-            pymel.core.AbcExport(verbose=True, jobArg=' '.join(options))
+            _call(pymel.core.AbcExport, verbose=True, jobArg=' '.join(options))
             
             # Create package file
             package = {
@@ -133,8 +149,8 @@ class MayaHost(Host):
             
         finally:
             # Revert to previous selection
-            pymel.core.select(clear=True)
-            pymel.core.select(previous_selection, replace=True)
+            _call(pymel.core.select, clear=True)
+            _call(pymel.core.select, previous_selection, replace=True)
         
         return target
     
