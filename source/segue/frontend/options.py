@@ -82,25 +82,31 @@ class OptionsWidget(QtGui.QFrame):
         self.start_frame_label = QtGui.QLabel('Start')
         self.start_frame_label.setBuddy(self.start_frame_widget)
         self.frame_range_group.layout().addWidget(self.start_frame_label)
-        self.frame_range_group.layout().addWidget(self.start_frame_widget)
+        self.frame_range_group.layout().addWidget(self.start_frame_widget,
+                                                  stretch=1)
         
         self.stop_frame_widget = QtGui.QDoubleSpinBox()
         self.end_frame_label = QtGui.QLabel('End')
         self.end_frame_label.setBuddy(self.stop_frame_widget)
         self.frame_range_group.layout().addWidget(self.end_frame_label)
-        self.frame_range_group.layout().addWidget(self.stop_frame_widget)
+        self.frame_range_group.layout().addWidget(self.stop_frame_widget,
+                                                  stretch=1)
         
         self.step_frame_widget = QtGui.QDoubleSpinBox()
         self.step_frame_label = QtGui.QLabel('Step')
         self.step_frame_label.setBuddy(self.step_frame_widget)
         self.frame_range_group.layout().addWidget(self.step_frame_label)
-        self.frame_range_group.layout().addWidget(self.step_frame_widget)
+        self.frame_range_group.layout().addWidget(self.step_frame_widget,
+                                                  stretch=1)
         
         self.processor_widget = QtGui.QComboBox()
         self.processor_label = QtGui.QLabel('Process')
         self.processor_label.setBuddy(self.processor_widget)
         self.layout().addWidget(self.processor_label, 2, 0)
         self.layout().addWidget(self.processor_widget, 2, 1)
+        
+        self.layout().setColumnStretch(0, 0)
+        self.layout().setColumnStretch(1, 1)
         
     def post_build(self):
         '''Perform post-build operations.'''
