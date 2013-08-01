@@ -31,19 +31,19 @@ class OptionsWidget(QtGui.QFrame):
         self.frame_range_group.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().addWidget(self.frame_range_group, 1, 1)
         
-        self.start_frame_widget = QtGui.QLineEdit()
+        self.start_frame_widget = QtGui.QDoubleSpinBox()
         self.start_frame_label = QtGui.QLabel('Start')
         self.start_frame_label.setBuddy(self.start_frame_widget)
         self.frame_range_group.layout().addWidget(self.start_frame_label)
         self.frame_range_group.layout().addWidget(self.start_frame_widget)
         
-        self.stop_frame_widget = QtGui.QLineEdit()
+        self.stop_frame_widget = QtGui.QDoubleSpinBox()
         self.end_frame_label = QtGui.QLabel('End')
         self.end_frame_label.setBuddy(self.stop_frame_widget)
         self.frame_range_group.layout().addWidget(self.end_frame_label)
         self.frame_range_group.layout().addWidget(self.stop_frame_widget)
 
-        self.step_frame_widget = QtGui.QLineEdit()
+        self.step_frame_widget = QtGui.QDoubleSpinBox()
         self.step_frame_label = QtGui.QLabel('Step')
         self.step_frame_label.setBuddy(self.step_frame_widget)
         self.frame_range_group.layout().addWidget(self.step_frame_label)
@@ -57,9 +57,15 @@ class OptionsWidget(QtGui.QFrame):
                 
     def post_build(self):
         '''Perform post-build operations.'''
-        self.step_frame_widget.setText('1.0')
-        self.start_frame_widget.setText('1.0')
-        self.stop_frame_widget.setText('24.0')
+        self.start_frame_widget.setMinimum(-10000.00)
+        self.start_frame_widget.setMaximum(10000.00)
+        
+        self.stop_frame_widget.setMinimum(-10000.00)
+        self.stop_frame_widget.setMaximum(10000.00)
+        
+        self.step_frame_widget.setValue(1.0)
+        self.start_frame_widget.setValue(1.0)
+        self.stop_frame_widget.setValue(24.0)
         
         self.frame_range_combobox.currentIndexChanged.connect(
             self.on_select_range
@@ -84,8 +90,8 @@ class OptionsWidget(QtGui.QFrame):
                 control.setEnabled(False)
                 
             start, stop = self.host.get_frame_range()
-            self.start_frame_widget.setText(str(start))
-            self.stop_frame_widget.setText(str(stop))
+            self.start_frame_widget.setValue(float(start))
+            self.stop_frame_widget.setValue(float(stop))
             
         else:
             for control in (self.start_frame_widget, self.stop_frame_widget):
