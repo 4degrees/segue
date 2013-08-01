@@ -128,12 +128,19 @@ class ExporterWidget(QtGui.QWidget):
         except Exception as error:
             traceback.print_exc()
             QtGui.QMessageBox.critical(
-                None,
+                self,
                 'Process failed',
                 'Could not export selection!'
                 '\n{0}'.format(error)
             )
         
+        else:
+            QtGui.QMessageBox.information(
+                self,
+                'Process completed',
+                'Selection exported successfully!'
+                '\n{0}'.format(worker.result or '') 
+            )
         finally:
             self.progress_bar.setMaximum(1)
             self.progress_bar.reset()
