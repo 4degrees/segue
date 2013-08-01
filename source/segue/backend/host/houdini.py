@@ -16,7 +16,7 @@ from .base import Host
 class HoudiniHost(Host):
     '''Represent Houdini application.'''
     
-    def load(self, package, target=None):
+    def load_package(self, package, target=None):
         '''Load *package* onto *target*.
         
         If *target* not specified create an appropriate parent node.

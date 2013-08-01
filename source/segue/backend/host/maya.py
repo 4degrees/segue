@@ -45,7 +45,20 @@ class MayaHost(Host):
             _call(pymel.core.playbackOptions, query=True, maxTime=True)
         )
     
-    def save(self, selection=None, source=None, target=None,
+    def save(self, target=None):
+        '''Save current scene to *target*.
+        
+        If *target* is not specified will use a temporary file.
+        
+        Return the saved file path.
+        
+        '''
+        if target is None:
+            _, target = tempfile.mkstemp(suffix='.mb')
+
+        return _call(pymel.core.exportAll, target, force=True)
+    
+    def save_package(self, selection=None, source=None, target=None,
              start=None, stop=None, step=1):
         '''Export *selection* in *source* for frame range to *target*.
         
