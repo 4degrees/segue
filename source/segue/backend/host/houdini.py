@@ -10,8 +10,10 @@ except ImportError:
 
 import hou
 
+from .base import Host
 
-class Houdini(object):
+
+class HoudiniHost(Host):
     '''Represent Houdini application.'''
     
     def load(self, package, target=None):

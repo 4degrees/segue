@@ -10,8 +10,10 @@ import json
 
 import pymel.core
 
+from .base import Host
 
-class Maya(object):
+
+class MayaHost(Host):
     '''Represent Maya application.'''
     
     def get_selection(self):
