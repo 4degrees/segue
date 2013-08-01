@@ -12,6 +12,12 @@ class BackgroundProcessor(Processor):
     
     def process(self, command, args=None, kw=None):
         '''Process *command* with *args* and *kw*.'''
+        if args is None:
+            args = ()
+        
+        if kw is None:
+            kw = {}
+        
         process = multiprocessing.Process(target=command, args=args, kwargs=kw)
         process.start()
         process.join()
