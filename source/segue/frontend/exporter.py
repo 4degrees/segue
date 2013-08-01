@@ -12,13 +12,43 @@ from .options import OptionsWidget
 class ExporterWidget(QtGui.QWidget):
     '''Manage exporting.'''
     
-    def __init__(self, host, parent=None):
-        '''Initialise with *host* application and *parent*.'''
+    def __init__(self, host, processors, parent=None):
+        '''Initialise with *host* application and *parent*.
+        
+        *processors* should be a list of
+        :py:class:`~segue.backend.processor.base.Processor` instances to make
+        available as processor options.
+        
+        '''
         super(ExporterWidget, self).__init__(parent=parent)
-        self.host = host
+        self._host = None
+        self._processors = None
         self.build()
         self.post_build()
         
+        self.host = host
+        self.set_processors(processors)
+    
+    @property
+    def host(self):
+        '''Return current host application.'''
+        return self._host
+    
+    @host.setter
+    def host(self, host):
+        '''Set host application to *host*.'''
+        self._host = host
+        self.options_widget.host = host
+        self.selector_widget.host = host
+    
+    def get_processors(self):
+        '''Return current processors.'''
+        return self.options_widget.get_processors()
+    
+    def set_processors(self, processors):
+        '''Set processors clearing any existing ones.'''
+        self.options_widget.set_processors(processors)
+    
     def build(self):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QVBoxLayout())

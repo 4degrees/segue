@@ -9,12 +9,59 @@ from PySide import QtGui, QtCore
 class OptionsWidget(QtGui.QFrame):
     '''Manage export options.'''
     
-    def __init__(self, host, parent=None):
+    def __init__(self, host, processors=None, parent=None):
         '''Initialise with *host* application and *parent*.'''
         super(OptionsWidget, self).__init__(parent=parent)
-        self.host = host
+        self._host = None
         self.build()
         self.post_build()
+        
+        self.host = host
+        
+        if processors:
+            self.set_processors(processors)
+    
+    @property
+    def host(self):
+        '''Return current host application.'''
+        return self._host
+    
+    @host.setter
+    def host(self, host):
+        '''Set host application to *host*.'''
+        self._host = host
+        
+        self.frame_range_combobox.clear()
+        self.frame_range_combobox.addItem('Set Manually', 'manual')
+        try:
+            self.host.get_frame_range()
+        except (NotImplementedError, AttributeError):
+            pass
+        else:
+            self.frame_range_combobox.addItem('Set From Time Slider', 'auto')
+            self.frame_range_combobox.setCurrentIndex(
+                self.frame_range_combobox.count() - 1
+            )
+    
+    def get_processors(self):
+        '''Return current processors.'''
+        processors = []
+        for index in self.processor_widget.count():
+            processors.append(
+                self.processor_widget.itemData(index)
+            )
+        
+        return processors
+    
+    def set_processors(self, processors):
+        '''Set processors clearing any existing ones.'''
+        self.processor_widget.clear()
+        
+        if processors is None:
+            return
+        
+        for processor in processors:
+            self.processor_widget.addItem(processor.display_name, processor)
         
     def build(self):
         '''Build and layout the interface.'''
@@ -70,17 +117,6 @@ class OptionsWidget(QtGui.QFrame):
         self.frame_range_combobox.currentIndexChanged.connect(
             self.on_select_range
         )
-        
-        self.frame_range_combobox.addItem('Set Manually', 'manual')
-        try:
-            self.host.get_frame_range()
-        except NotImplementedError:
-            pass
-        else:
-            self.frame_range_combobox.addItem('Set From Time Slider', 'auto')
-            self.frame_range_combobox.setCurrentIndex(
-                self.frame_range_combobox.count() - 1
-            )
     
     def on_select_range(self, index):
         '''Handle choice of range options.'''
