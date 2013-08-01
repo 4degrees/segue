@@ -2,6 +2,7 @@
 # :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
 # :license: See LICENSE.txt.
 
+import os
 import sys
 
 from PySide import QtGui
@@ -33,7 +34,9 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 
     host = MockHost()
-    processors = discover_processors()
+    processors = discover_processors(paths=[
+        os.path.join(os.path.dirname(__file__), 'plugin')
+    ])
     widget = ExporterWidget(host=host, processors=processors)
     widget.show()
     
