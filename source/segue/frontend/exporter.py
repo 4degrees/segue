@@ -2,11 +2,13 @@
 # :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
 # :license: See LICENSE.txt.
 
+import traceback
 
 from PySide import QtGui
 
 from .selector import SelectorWidget
 from .options import OptionsWidget
+from .worker import Worker
 
 
 class ExporterWidget(QtGui.QWidget):
@@ -68,6 +70,10 @@ class ExporterWidget(QtGui.QWidget):
         self.export_button = QtGui.QPushButton('Export')
         self.layout().addWidget(self.export_button)
         
+        self.progress_bar = QtGui.QProgressBar()
+        self.layout().addWidget(self.progress_bar)
+        self.progress_bar.hide()
+        
     def post_build(self):
         '''Perform post-build operations.'''
         self.setWindowTitle('Segue Exporter')
@@ -95,4 +101,42 @@ class ExporterWidget(QtGui.QWidget):
             return
         
         self.export_button.setEnabled(True)
+    
+    def export(self):
+        '''Perform export according to set options.'''
+        processor = self.options_widget.processor_widget.itemData(
+            self.options_widget.processor_widget.currentIndex()
+        )
+        
+        options = {}
+        
+        self.export_button.hide()
+        self.progress_bar.setRange(0, 0) # Indeterminate
+        self.progress_bar.show()
+        
+        try:
+            worker = Worker(processor.process, [self.host.save, None, options])
+            worker.start()
+          
+            while worker.isRunning():
+                app = QtGui.QApplication.instance()
+                app.processEvents()
+      
+            if worker.error:
+                raise worker.error[1], None, worker.error[2]
+             
+        except Exception as error:
+            traceback.print_exc()
+            QtGui.QMessageBox.critical(
+                None,
+                'Process failed',
+                'Could not export selection!'
+                '\n{0}'.format(error)
+            )
+        
+        finally:
+            self.progress_bar.setMaximum(1)
+            self.progress_bar.reset()
+            self.progress_bar.hide()
+            self.export_button.show()
 
