@@ -42,3 +42,21 @@ class ExporterWidget(QtGui.QWidget):
         '''Perform post-build operations.'''
         self.setWindowTitle('Segue Exporter')
         
+        self.selector_widget.added.connect(self.on_selection_changed)
+        self.selector_widget.removed.connect(self.on_selection_changed)
+        
+        self.validate()
+        
+    def on_selection_changed(self, items):
+        '''Handle selection change.'''
+        self.validate()
+        
+    def validate(self):
+        '''Validate options and update UI state.'''
+        self.export_button.setEnabled(False)
+        
+        if not self.selector_widget.items():
+            return
+        
+        self.export_button.setEnabled(True)
+
