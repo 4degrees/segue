@@ -42,19 +42,19 @@ class OptionsWidget(QtGui.QFrame):
         self.end_frame_label.setBuddy(self.stop_frame_widget)
         self.frame_range_group.layout().addWidget(self.end_frame_label)
         self.frame_range_group.layout().addWidget(self.stop_frame_widget)
-
+        
         self.step_frame_widget = QtGui.QDoubleSpinBox()
         self.step_frame_label = QtGui.QLabel('Step')
         self.step_frame_label.setBuddy(self.step_frame_widget)
         self.frame_range_group.layout().addWidget(self.step_frame_label)
         self.frame_range_group.layout().addWidget(self.step_frame_widget)
-
+        
         self.dispatcher_widget = QtGui.QComboBox()
         self.dispatcher_label = QtGui.QLabel('Process')
         self.dispatcher_label.setBuddy(self.dispatcher_widget)
         self.layout().addWidget(self.dispatcher_label, 2, 0)
         self.layout().addWidget(self.dispatcher_widget, 2, 1)
-                
+        
     def post_build(self):
         '''Perform post-build operations.'''
         self.start_frame_widget.setMinimum(-10000.00)
@@ -81,7 +81,7 @@ class OptionsWidget(QtGui.QFrame):
             self.frame_range_combobox.setCurrentIndex(
                 self.frame_range_combobox.count() - 1
             )
-        
+    
     def on_select_range(self, index):
         '''Handle choice of range options.'''
         option = self.frame_range_combobox.itemData(index)
@@ -96,5 +96,4 @@ class OptionsWidget(QtGui.QFrame):
         else:
             for control in (self.start_frame_widget, self.stop_frame_widget):
                 control.setEnabled(True)
-            
-        
+
