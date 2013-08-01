@@ -100,7 +100,7 @@ class MayaHost(Host):
         previous_selection = pymel.core.ls(selection=True)
         
         try:
-            pymel.core.select(nodes, replace=True)
+            pymel.core.select(selection, replace=True)
     
             # Export obj for reference (to preserve groups)
             pymel.core.exportSelected(
@@ -110,10 +110,10 @@ class MayaHost(Host):
             )
             
             # Export alembic cache
-            pymel.core.select(nodes, hierarchy=True, replace=True)
+            pymel.core.select(selection, hierarchy=True, replace=True)
             
             options = []
-            for entry in nodes:
+            for entry in selection:
                 options.append('-root {0}'.format(entry))
             options.append('-frameRange {0} {1}'.format(start, stop))
             options.append('-step {0}'.format(step))
