@@ -20,5 +20,5 @@ class BackgroundProcessor(Processor):
         
         process = multiprocessing.Process(target=command, args=args, kwargs=kw)
         process.start()
-        process.join()
+        return 'Background process started: {0}'.format(process.pid)
 
