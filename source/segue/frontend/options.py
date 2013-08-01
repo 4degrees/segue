@@ -37,11 +37,11 @@ class OptionsWidget(QtGui.QFrame):
         self.frame_range_group.layout().addWidget(self.start_frame_label)
         self.frame_range_group.layout().addWidget(self.start_frame_widget)
         
-        self.end_frame_widget = QtGui.QLineEdit()
+        self.stop_frame_widget = QtGui.QLineEdit()
         self.end_frame_label = QtGui.QLabel('End')
-        self.end_frame_label.setBuddy(self.end_frame_widget)
+        self.end_frame_label.setBuddy(self.stop_frame_widget)
         self.frame_range_group.layout().addWidget(self.end_frame_label)
-        self.frame_range_group.layout().addWidget(self.end_frame_widget)
+        self.frame_range_group.layout().addWidget(self.stop_frame_widget)
 
         self.step_frame_widget = QtGui.QLineEdit()
         self.step_frame_label = QtGui.QLabel('Step')
@@ -57,4 +57,38 @@ class OptionsWidget(QtGui.QFrame):
                 
     def post_build(self):
         '''Perform post-build operations.'''
+        self.step_frame_widget.setText('1.0')
+        self.start_frame_widget.setText('1.0')
+        self.stop_frame_widget.setText('24.0')
+        
+        self.frame_range_combobox.currentIndexChanged.connect(
+            self.on_select_range
+        )
+        
+        self.frame_range_combobox.addItem('Set Manually', 'manual')
+        try:
+            self.host.get_frame_range()
+        except NotImplementedError:
+            pass
+        else:
+            self.frame_range_combobox.addItem('Set From Time Slider', 'auto')
+            self.frame_range_combobox.setCurrentIndex(
+                self.frame_range_combobox.count() - 1
+            )
+        
+    def on_select_range(self, index):
+        '''Handle choice of range options.'''
+        option = self.frame_range_combobox.itemData(index)
+        if option == 'auto':
+            for control in (self.start_frame_widget, self.stop_frame_widget):
+                control.setEnabled(False)
+                
+            start, stop = self.host.get_frame_range()
+            self.start_frame_widget.setText(str(start))
+            self.stop_frame_widget.setText(str(stop))
+            
+        else:
+            for control in (self.start_frame_widget, self.stop_frame_widget):
+                control.setEnabled(True)
+            
         
