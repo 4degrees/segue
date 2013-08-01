@@ -49,11 +49,11 @@ class OptionsWidget(QtGui.QFrame):
         self.frame_range_group.layout().addWidget(self.step_frame_label)
         self.frame_range_group.layout().addWidget(self.step_frame_widget)
         
-        self.dispatcher_widget = QtGui.QComboBox()
-        self.dispatcher_label = QtGui.QLabel('Process')
-        self.dispatcher_label.setBuddy(self.dispatcher_widget)
-        self.layout().addWidget(self.dispatcher_label, 2, 0)
-        self.layout().addWidget(self.dispatcher_widget, 2, 1)
+        self.processor_widget = QtGui.QComboBox()
+        self.processor_label = QtGui.QLabel('Process')
+        self.processor_label.setBuddy(self.processor_widget)
+        self.layout().addWidget(self.processor_label, 2, 0)
+        self.layout().addWidget(self.processor_widget, 2, 1)
         
     def post_build(self):
         '''Perform post-build operations.'''
