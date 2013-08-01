@@ -44,6 +44,7 @@ def discover_processors(paths=None, options=None):
                 
                 module = imp.load_source(module_name, module_path)
                 processor = module.register(**options)
-    
+                processors.append(processor)
+                
     return processors
 

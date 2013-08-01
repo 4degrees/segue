@@ -6,10 +6,12 @@ import sys
 
 from PySide import QtGui
 
+from segue import discover_processors
+from segue.backend.host.base import Host
 from segue.frontend.exporter import ExporterWidget
 
 
-class Host(object):
+class MockHost(Host):
     '''Mock host implementation.'''
     
     def get_selection(self):
@@ -17,13 +19,22 @@ class Host(object):
         return ['|group1|objectA', '|group2|objectB', '|objectC',
                 '|group3|group4|objectD']
 
+    def get_frame_range(self):
+        '''Return current frame range.'''
+        return (1.0, 24.0)
+    
+    def save(self):
+        '''Export.'''
+        print 'Export.'''
+
 
 if __name__ == '__main__':
     '''Interactively test the exporter.'''
     app = QtGui.QApplication(sys.argv)
 
-    host = Host()
-    widget = ExporterWidget(host=host)
+    host = MockHost()
+    processors = discover_processors()
+    widget = ExporterWidget(host=host, processors=processors)
     widget.show()
     
     raise SystemExit(app.exec_())
