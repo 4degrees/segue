@@ -37,14 +37,14 @@ class SelectorWidget(QtGui.QFrame):
         self.layout().addWidget(self.list_widget, 0, 0, 3, 1)
         
         self.add_button = QtGui.QPushButton()
-        self.add_button.setToolTip('Select items in application and click to'
+        self.add_button.setToolTip('Select items in application and click to '
                                    'add them to the list.')
         self.add_button.setIcon(QtGui.QPixmap(':icon_plus'))
 
         self.layout().addWidget(self.add_button, 0, 1)
         
         self.remove_button = QtGui.QPushButton()
-        self.remove_button.setToolTip('Select items in the list and click to'
+        self.remove_button.setToolTip('Select items in the list and click to '
                                       'remove them.')
         self.remove_button.setIcon(QtGui.QPixmap(':icon_minus'))
         self.layout().addWidget(self.remove_button, 1, 1)
