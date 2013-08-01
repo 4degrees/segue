@@ -8,36 +8,6 @@ from PySide import QtGui, QtCore
 from . import icon
 
 
-class SelectDialog(QtGui.QDialog):
-    '''Add nodes to selection.'''
-    
-    def __init__(self, parent=None):
-        '''Initialise with *parent*.'''
-        super(SelectDialog, self).__init__(parent=parent)
-        self.build()
-        self.post_build()
-
-    def build(self):
-        '''Build and layout the interface.'''
-        self.setLayout(QtGui.QVBoxLayout())
-        self.advice_label = QtGui.QLabel('Select objects in application and '
-                                         'click "Add"')
-        self.advice_label.setAlignment(QtCore.Qt.AlignHCenter)
-        self.layout().addWidget(self.advice_label)
-        
-        self.confirm_button = QtGui.QPushButton('Add')
-        self.layout().addWidget(self.confirm_button)
-        
-        self.cancel_button = QtGui.QPushButton('Cancel')
-        self.layout().addWidget(self.cancel_button)
-        
-    def post_build(self):
-        '''Perform post-build operations.'''
-        self.setWindowTitle('Add selection.')
-        self.confirm_button.clicked.connect(self.accept)
-        self.cancel_button.clicked.connect(self.reject)
-
-
 class SelectorWidget(QtGui.QFrame):
     '''Manage selection of nodes.'''
     
@@ -67,26 +37,25 @@ class SelectorWidget(QtGui.QFrame):
         self.layout().addWidget(self.list_widget, 0, 0, 3, 1)
         
         self.add_button = QtGui.QPushButton()
-        self.add_button.setToolTip('Select items to add to list.')
+        self.add_button.setToolTip('Select items in application and click to'
+                                   'add them to the list.')
         self.add_button.setIcon(QtGui.QPixmap(':icon_plus'))
 
         self.layout().addWidget(self.add_button, 0, 1)
         
         self.remove_button = QtGui.QPushButton()
-        self.remove_button.setToolTip('Remove selected items from list.')
+        self.remove_button.setToolTip('Select items in the list and click to'
+                                      'remove them.')
         self.remove_button.setIcon(QtGui.QPixmap(':icon_minus'))
         self.layout().addWidget(self.remove_button, 1, 1)
         
         self.layout().setRowStretch(2, 1)
         self.layout().setColumnStretch(0, 1)
         
-        self.select_dialog = SelectDialog(parent=self)
-    
     def post_build(self):
         '''Perform post-build operations.'''
-        self.add_button.clicked.connect(self.select_dialog.show)
+        self.add_button.clicked.connect(self._on_add)
         self.remove_button.clicked.connect(self._on_remove)
-        self.select_dialog.accepted.connect(self._on_select)
     
     def items(self):
         '''Return current items.'''
@@ -96,11 +65,8 @@ class SelectorWidget(QtGui.QFrame):
         
         return items
     
-    def _on_select(self):
+    def _on_add(self):
         '''Handle selection addition.'''
-        self.select_dialog.hide()
-        
-        # TODO: Replace dummy data.
         items = self.host.get_selection()
         self.add(items)
         
