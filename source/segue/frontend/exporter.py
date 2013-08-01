@@ -9,6 +9,7 @@ from PySide import QtGui
 from .selector import SelectorWidget
 from .options import OptionsWidget
 from .worker import Worker
+from ..backend.processor.foreground import ForegroundProcessor
 
 
 class ExporterWidget(QtGui.QWidget):
@@ -109,14 +110,28 @@ class ExporterWidget(QtGui.QWidget):
             self.options_widget.processor_widget.currentIndex()
         )
         
-        options = {}
-        
         self.export_button.hide()
         self.progress_bar.setRange(0, 0) # Indeterminate
         self.progress_bar.show()
         
+        options = {
+            'source': None,
+            'selection': self.selector_widget.items(),
+            'target': None,
+            'start': self.options_widget.start_frame_widget.value(),
+            'stop': self.options_widget.stop_frame_widget.value(),
+            'step': self.options_widget.step_frame_widget.value()
+        }
+        
+        # TODO: Can this be decoupled?
+        if not isinstance(processor, ForegroundProcessor):
+            temporary_file = self.host.save()
+            options['source'] = temporary_file
+        
+        command = [self.host.save_package, None, options]
+        
         try:
-            worker = Worker(processor.process, [self.host.save, None, options])
+            worker = Worker(processor.process, command)
             worker.start()
           
             while worker.isRunning():
