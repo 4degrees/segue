@@ -71,6 +71,7 @@ class ExporterWidget(QtGui.QWidget):
         self.layout().addWidget(self.export_button)
         
         self.progress_bar = QtGui.QProgressBar()
+        self.progress_bar.setTextVisible(False)
         self.layout().addWidget(self.progress_bar)
         self.progress_bar.hide()
         
