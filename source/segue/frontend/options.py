@@ -105,8 +105,25 @@ class OptionsWidget(QtGui.QFrame):
         self.layout().addWidget(self.processor_label, 2, 0)
         self.layout().addWidget(self.processor_widget, 2, 1)
         
+        
+        self.target_widget = QtGui.QLineEdit()
+        self.target_button = QtGui.QPushButton('Choose')
+        self.target_layout = QtGui.QHBoxLayout()
+        self.target_layout.addWidget(self.target_widget, stretch=1)
+        self.target_layout.addWidget(self.target_button)
+        
+        self.target_label = QtGui.QLabel('Save To')
+        self.target_label.setBuddy(self.target_widget)
+        
+        self.layout().addWidget(self.target_label, 3, 0)
+        self.layout().addLayout(self.target_layout, 3, 1)
+        
         self.layout().setColumnStretch(0, 0)
         self.layout().setColumnStretch(1, 1)
+        
+        self.target_dialog = QtGui.QFileDialog()
+        self.target_dialog.setFileMode(QtGui.QFileDialog.Directory)
+        self.target_dialog.setOption(QtGui.QFileDialog.ShowDirsOnly)
         
     def post_build(self):
         '''Perform post-build operations.'''
@@ -123,7 +140,9 @@ class OptionsWidget(QtGui.QFrame):
         self.frame_range_combobox.currentIndexChanged.connect(
             self.on_select_range
         )
-    
+        
+        self.target_button.clicked.connect(self.on_choose_target)
+        
     def on_select_range(self, index):
         '''Handle choice of range options.'''
         option = self.frame_range_combobox.itemData(index)
@@ -138,4 +157,12 @@ class OptionsWidget(QtGui.QFrame):
         else:
             for control in (self.start_frame_widget, self.stop_frame_widget):
                 control.setEnabled(True)
+
+    def on_choose_target(self):
+        '''Handle choosing a target.'''
+        current = self.target_widget.text()
+        self.target_dialog.setDirectory(current)
+        if self.target_dialog.exec_():
+            selected = self.target_dialog.selectedFiles()[0]
+            self.target_widget.setText(selected)
 

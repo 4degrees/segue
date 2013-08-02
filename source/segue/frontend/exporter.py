@@ -85,6 +85,8 @@ class ExporterWidget(QtGui.QWidget):
         self.options_widget.processor_widget.currentIndexChanged.connect(
             self.validate
         )
+        self.options_widget.target_widget.textChanged.connect(self.validate)
+        
         self.export_button.clicked.connect(self.export)
         
         self.validate()
@@ -102,6 +104,10 @@ class ExporterWidget(QtGui.QWidget):
         if processor is None:
             return
         
+        target = self.options_widget.target_widget.text()
+        if not target:
+            return
+        
         self.export_button.setEnabled(True)
     
     def export(self):
@@ -117,7 +123,7 @@ class ExporterWidget(QtGui.QWidget):
         options = {
             'source': None,
             'selection': self.selector_widget.items(),
-            'target': None,
+            'target': self.options_widget.target_widget.text(),
             'start': self.options_widget.start_frame_widget.value(),
             'stop': self.options_widget.stop_frame_widget.value(),
             'step': self.options_widget.step_frame_widget.value()

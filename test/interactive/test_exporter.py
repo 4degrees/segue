@@ -5,6 +5,7 @@
 import os
 import sys
 import time
+import tempfile
 
 from PySide import QtGui
 
@@ -32,7 +33,10 @@ class MockHost(Host):
     def save_package(self, selection=None, source=None, target=None,
                      start=None, stop=None, step=1):
         '''Export.'''
-        print 'Export.'''
+        if target is None:
+            target = tempfile.mkdtemp('_segue')
+            
+        print 'Exporting to {0}.'''.format(target)
         for index in range(10):
             print 10 - index
             time.sleep(1)
