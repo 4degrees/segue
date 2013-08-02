@@ -25,7 +25,12 @@ class MockHost(Host):
         '''Return current frame range.'''
         return (1.0, 24.0)
     
-    def save(self):
+    def save(self, target=None):
+        '''Save scene.'''
+        pass
+    
+    def save_package(self, selection=None, source=None, target=None,
+                     start=None, stop=None, step=1):
         '''Export.'''
         print 'Export.'''
         for index in range(10):
