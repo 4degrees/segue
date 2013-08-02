@@ -31,6 +31,10 @@ class ExporterWidget(QtGui.QWidget):
         
         self.host = host
         self.set_processors(processors)
+        
+        # Auto-add any current selection.
+        items = self.host.get_selection()
+        self.selector_widget.add(items)
     
     @property
     def host(self):
