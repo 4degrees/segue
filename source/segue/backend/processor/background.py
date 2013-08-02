@@ -40,10 +40,9 @@ class BackgroundProcessor(Processor):
             'data = pickle.loads(data);'
             'data[\'command\'](*data[\'args\'], **data[\'kw\'])'
         ).format(serialised.replace("'", r"\'"))
-
+        
         command = ' '.join(['python', '-c', '"{0}"'.format(python_statement)])
-        print command
-        print ''
+        
         process = subprocess.Popen(command)
         return 'Background process started: {0}'.format(process.pid)
 
