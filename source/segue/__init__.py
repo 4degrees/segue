@@ -41,10 +41,15 @@ def discover_processors(paths=None, options=None):
                 
                 module_path = os.path.join(base, filename)
                 module_name = uuid.uuid4().hex
-                
-                module = imp.load_source(module_name, module_path)
-                processor = module.register(**options)
-                processors.append(processor)
+                try:
+                    module = imp.load_source(module_name, module_path)
+                    processor = module.register(**options)
+                except Exception as error:
+                    print('Segue:Warning:Failed to load plugin {0}: {1}'
+                          .format(module_path, error))
+                else:
+                    if processor is not None:
+                        processors.append(processor)
                 
     return processors
 
