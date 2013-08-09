@@ -21,8 +21,8 @@ def setup():
             import segue.backend.host.maya
             import segue
             
-            processors = segue.discover_processors()
             host = segue.backend.host.maya.MayaHost()
+            processors = segue.discover_processors(options={'host': host})
             exporter = segue.frontend.exporter.ExporterWidget(
                 host=host, processors=processors
             )
