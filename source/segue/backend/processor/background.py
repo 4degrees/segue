@@ -43,12 +43,12 @@ class BackgroundProcessor(Processor):
         
         command = []
         if self.host is None:
-            command.extend('python')
+            command.append('python')
         else:
             command.extend(self.host.get_python_prefix())
         
         command.extend(['-c', python_statement])
-        
+        print command
         process = subprocess.Popen(command)
         return 'Background process started: {0}'.format(process.pid)
 

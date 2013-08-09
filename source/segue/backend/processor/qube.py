@@ -41,7 +41,7 @@ class QubeProcessor(Processor):
 
         command = []
         if self.host is None:
-            command.extend('python')
+            command.append('python')
         else:
             command.extend(self.host.get_python_prefix())
         
