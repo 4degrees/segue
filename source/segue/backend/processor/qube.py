@@ -9,8 +9,6 @@ try:
 except ImportError:
     from pipes import quote
 
-import qb
-
 from .base import Processor
 from .. import pickle_support
 
@@ -49,7 +47,14 @@ class QubeProcessor(Processor):
         
         command.extend(['-c', python_statement])
 
-        job = {
+        job = self._create_job(command)
+        job_id = self._submit_job(job)
+        
+        return 'Submitted Qube job: {0}'.format(job_id)
+    
+    def _create_job(self, command):
+        '''Create and return the Qube job for the *command*.'''
+        return {
             'prototype': 'cmdline',
             'name': 'segue',
             'cpus': 1,
@@ -57,8 +62,15 @@ class QubeProcessor(Processor):
                 'cmdline': ' '.join(command)
             }
         }
+    
+    def _submit_job(self, job):
+        '''Submit the *job* to Qube.
         
-        job_id = qb.submit(job)
+        Return the job id.
         
-        return 'Submitted Qube job: {0}'.format(job_id)
+        '''
+        # Import here so that subclasses can avoid qb import if desired.
+        import qb
+        
+        return qb.submit(job)
 
