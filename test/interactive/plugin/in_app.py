@@ -7,5 +7,5 @@ from segue.backend.processor.foreground import ForegroundProcessor
 
 def register(**kw):
     '''Register processor.'''
-    return ForegroundProcessor('in_app', 'Here And Now')
+    return ForegroundProcessor('in_app', 'Here And Now', host=kw.get('host'))
 

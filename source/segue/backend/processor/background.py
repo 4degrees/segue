@@ -41,7 +41,13 @@ class BackgroundProcessor(Processor):
             'data[\'command\'](*data[\'args\'], **data[\'kw\'])'
         ).format(serialised.replace("'", r"\'"))
         
-        command = ['python', '-c', python_statement]
+        command = []
+        if self.host is None:
+            command.extend('python')
+        else:
+            command.extend(self.host.get_python_prefix())
+        
+        command.extend(['-c', python_statement])
         
         process = subprocess.Popen(command)
         return 'Background process started: {0}'.format(process.pid)

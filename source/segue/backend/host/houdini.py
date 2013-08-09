@@ -16,6 +16,10 @@ from .base import Host
 class HoudiniHost(Host):
     '''Represent Houdini application.'''
     
+    def get_python_prefix(self):
+        '''Return Python executable prefix as a list.'''
+        return ['hython']
+    
     def load_package(self, package, target=None):
         '''Load *package* onto *target*.
         

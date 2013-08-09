@@ -41,14 +41,20 @@ class QubeProcessor(Processor):
             'data[\'command\'](*data[\'args\'], **data[\'kw\'])'
         ).format(serialised.replace("'", r"\'"))
 
-        command = ' '.join(['python', '-c', '"{0}"'.format(python_statement)])
+        command = []
+        if self.host is None:
+            command.extend('python')
+        else:
+            command.extend(self.host.get_python_prefix())
+        
+        command.extend(['-c', python_statement])
 
         job = {
             'prototype': 'cmdline',
             'name': 'segue',
             'cpus': 1,
             'package': {
-                'cmdline': command
+                'cmdline': ' '.join(command)
             }
         }
         

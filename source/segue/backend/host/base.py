@@ -15,6 +15,10 @@ class Host(object):
         if self.name is None:
             self.name = self.__class__.__name__.lower()
     
+    def get_python_prefix(self):
+        '''Return Python executable prefix as a list.'''
+        return ['python']
+    
     def get_selection(self):
         '''Return the current selection as a list of ids.'''
         raise NotImplementedError()

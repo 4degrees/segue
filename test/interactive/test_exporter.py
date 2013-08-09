@@ -49,7 +49,7 @@ if __name__ == '__main__':
     host = MockHost()
     processors = discover_processors(paths=[
         os.path.join(os.path.dirname(__file__), 'plugin')
-    ])
+    ], options={'host': host})
     widget = ExporterWidget(host=host, processors=processors)
     widget.show()
     

@@ -28,6 +28,10 @@ except AttributeError:
 class MayaHost(Host):
     '''Represent Maya application.'''
     
+    def get_python_prefix(self):
+        '''Return Python executable prefix as a list.'''
+        return ['mayapy']
+    
     def get_selection(self):
         '''Return the current selection as a list of ids.'''
         selected = _call(pymel.core.ls, selection=True)
