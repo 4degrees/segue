@@ -41,7 +41,17 @@ class HoudiniHost(Host):
         
         with open(package_path, 'r') as package_file:
             package = json.load(package_file)
-        
+
+        package_root_path = os.path.abspath(os.path.dirname(package_path))
+
+        # Create final output geometry node.
+        output_geometry_node = target.createNode('geo', 'output')
+        output_geometry_node.node('file1').destroy()
+        switch_node = output_geometry_node.createNode(
+            'switch', 'implementation'
+        )
+
+        # Construct default 'unoptimised' implementation.
         cache_relative_path = package.get('cache')
         if not cache_relative_path:
             raise ValueError('No cache specified in package.')
@@ -50,19 +60,15 @@ class HoudiniHost(Host):
         if not reference_relative_path:
             raise ValueError('No reference specified in package.')
         
-        package_root_path = os.path.abspath(os.path.dirname(package_path))
         cache_path = os.path.join(package_root_path, cache_relative_path)
         reference_path = os.path.join(package_root_path,
                                       reference_relative_path)
-        
-        # TODO: Check for 'houdini' attribute which will be bgeo. If found, use
-        # that instead.
 
-        # Create output container
-        geometry_node = target.createNode('geo', 'output')
+        # Create unoptimised output container
+        unoptimised_geometry_node = target.createNode('geo', 'unoptimised')
 
         # Read in reference object
-        reference_node = geometry_node.node('file1')
+        reference_node = unoptimised_geometry_node.node('file1')
         reference_node.setName('reference')
         reference_node.parm('file').set(str(reference_path))
 
@@ -78,7 +84,9 @@ class HoudiniHost(Host):
             if child.type().name() == 'geo':
                 geometry_nodes.append(child)
         
-        merge_node = geometry_node.createNode('object_merge', 'cache')
+        merge_node = unoptimised_geometry_node.createNode(
+            'object_merge', 'cache'
+        )
         merge_node.parm('xformtype').set(1) # Into This Object
         merge_node.parm('numobj').set(len(geometry_nodes))
 
@@ -135,7 +143,51 @@ class HoudiniHost(Host):
         reference_node.setRenderFlag(0)
         alembic_node.setDisplayFlag(0)
         group_node.setDisplayFlag(1)
-        
+        unoptimised_geometry_node.setDisplayFlag(0)
+
         # Layout
-        geometry_node.layoutChildren()
+        unoptimised_geometry_node.layoutChildren()
+
+        # Connect to switch.
+        unoptimised_merge_node = output_geometry_node.createNode(
+            'object_merge', 'unoptimised'
+        )
+        unoptimised_merge_node.parm('xformtype').set(1)  # Into This Object
+        unoptimised_merge_node.parm('numobj').set(1)
+        unoptimised_merge_node.parm('objpath1').set(
+            unoptimised_geometry_node.path()
+        )
+
+        switch_node.setNextInput(unoptimised_merge_node)
+
+        # Load and switch to optimised version if available.
+        if 'houdini' in package:
+            bgeo_path = os.path.join(package_root_path, package['houdini'])
+
+            optimised_geometry_node = target.createNode('geo', 'optimised')
+            file_node = optimised_geometry_node.node('file1')
+            file_node.setName('output')
+            file_node.parm('file').set(str(bgeo_path))
+
+            # Flags
+            optimised_geometry_node.setDisplayFlag(0)
+
+            # Layout
+            optimised_geometry_node.layoutChildren()
+
+            # Connect to switch.
+            optimised_merge_node = output_geometry_node.createNode(
+                'object_merge', 'optimised'
+            )
+            optimised_merge_node.parm('xformtype').set(1)  # Into This Object
+            optimised_merge_node.parm('numobj').set(1)
+            optimised_merge_node.parm('objpath1').set(
+                optimised_geometry_node.path()
+            )
+
+            switch_node.setNextInput(optimised_merge_node)
+            switch_node.parm('input').set(1)
+
+        # Layout
+        output_geometry_node.layoutChildren()
         target.layoutChildren()
