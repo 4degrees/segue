@@ -115,8 +115,10 @@ class HoudiniHost(Host):
         
         # Group
         group_node = facet_node.createOutputNode('group', 'output')
-        
-        alembic_node.setDisplayFlag(0)    
+
+        # Flags
+        reference_node.setRenderFlag(0)
+        alembic_node.setDisplayFlag(0)
         group_node.setDisplayFlag(1)
         
         # Layout
