@@ -57,7 +57,15 @@ class HoudiniHost(Host):
         
         # TODO: Check for 'houdini' attribute which will be bgeo. If found, use
         # that instead.
-        
+
+        # Create output container
+        geometry_node = target.createNode('geo', 'output')
+
+        # Read in reference object
+        reference_node = geometry_node.node('file1')
+        reference_node.setName('reference')
+        reference_node.parm('file').set(str(reference_path))
+
         # Create Alembic archive
         alembic_node = target.createNode('alembicarchive', 'cache')
         alembic_node.parm('fileName').set(str(cache_path))
@@ -70,20 +78,27 @@ class HoudiniHost(Host):
             if child.type().name() == 'geo':
                 geometry_nodes.append(child)
         
-        geometry_node = target.createNode('geo', 'output')
         merge_node = geometry_node.createNode('object_merge', 'cache')
         merge_node.parm('xformtype').set(1) # Into This Object
         merge_node.parm('numobj').set(len(geometry_nodes))
-        
-        for index, entry in enumerate(geometry_nodes):
+
+        # Merge must happen in same order as reference object setup.
+        # TODO: Is there a better way rather than relying on brittle naming?
+        primitive_groups = []
+        for primitive_group in reference_node.geometry().primGroups():
+            primitive_name = primitive_group.name()
+            if primitive_name != 'default':
+                primitive_groups.append(primitive_name)
+
+        for candidate_geometry_node in geometry_nodes:
+            candidate_name = candidate_geometry_node.name()
+            if candidate_name.endswith('Shape'):
+                candidate_name = candidate_name[:-5]
+
+            index = primitive_groups.index(candidate_name)
             parameter_name = 'objpath{0}'.format(index + 1)
-            merge_node.parm(parameter_name).set(entry.path())
-        
-        # Read in reference object
-        reference_node = geometry_node.node('file1')
-        reference_node.setName('reference')
-        reference_node.parm('file').set(str(reference_path))
-        
+            merge_node.parm(parameter_name).set(candidate_geometry_node.path())
+
         # Map Alembic animation onto reference geometry
         point_node = reference_node.createOutputNode('point', 'map_points')
         point_node.setInput(1, merge_node)
@@ -124,4 +139,3 @@ class HoudiniHost(Host):
         # Layout
         geometry_node.layoutChildren()
         target.layoutChildren()
-
