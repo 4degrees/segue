@@ -3,6 +3,7 @@
 # :license: See LICENSE.txt.
 
 import os
+import re
 try:
     import json
 except ImportError:
@@ -11,6 +12,9 @@ except ImportError:
 import hou
 
 from .base import Host
+
+
+SHAPE_REGEX = re.compile('Shape(\d+)$')
 
 
 class HoudiniHost(Host):
@@ -100,9 +104,7 @@ class HoudiniHost(Host):
 
         for candidate_geometry_node in geometry_nodes:
             candidate_name = candidate_geometry_node.name()
-            if candidate_name.endswith('Shape'):
-                candidate_name = candidate_name[:-5]
-
+            candidate_name = SHAPE_REGEX.sub('\g<1>', candidate_name)
             index = primitive_groups.index(candidate_name)
             parameter_name = 'objpath{0}'.format(index + 1)
             merge_node.parm(parameter_name).set(candidate_geometry_node.path())
