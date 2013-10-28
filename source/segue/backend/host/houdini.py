@@ -37,8 +37,8 @@ class HoudiniHost(Host):
         # Load package file
         package_path = target.evalParm('package')
         if not os.path.isfile(package_path):
-            return
-        
+            raise ValueError('Not a valid package: {0}'.format(package_path))
+
         with open(package_path, 'r') as package_file:
             package = json.load(package_file)
 
