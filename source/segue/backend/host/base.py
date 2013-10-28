@@ -64,7 +64,9 @@ class Host(object):
         '''Load *package* onto *target*.
         
         If *target* not specified create an appropriate parent node.
-        
+
+        Return target node.
+
         '''
         raise NotImplementedError()
     

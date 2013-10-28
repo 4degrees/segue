@@ -28,7 +28,9 @@ class HoudiniHost(Host):
         '''Load *package* onto *target*.
         
         If *target* not specified create an appropriate parent node.
-        
+
+        Return target node.
+
         '''
         if target is None:
             target = hou.node('/obj').createNode('Segue')
@@ -193,3 +195,4 @@ class HoudiniHost(Host):
         # Layout
         output_geometry_node.layoutChildren()
         target.layoutChildren()
+        return target
