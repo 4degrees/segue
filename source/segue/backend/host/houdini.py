@@ -27,7 +27,7 @@ class HoudiniHost(Host):
         
         '''
         if target is None:
-            target = hou.node('/obj').createNode('uk.ltd.4degrees::segue')
+            target = hou.node('/obj').createNode('Segue')
             target.parm('package').set(str(package))
         
         # Clear children
