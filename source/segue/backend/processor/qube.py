@@ -45,7 +45,7 @@ class QubeProcessor(Processor):
         else:
             command.extend(self.host.get_python_prefix())
         
-        command.extend(['-c', python_statement])
+        command.extend(['-c', '"{0}"'.format(python_statement)])
 
         job = self._create_job(command)
         job_id = self._submit_job(job)
