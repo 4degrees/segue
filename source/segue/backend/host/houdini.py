@@ -3,6 +3,7 @@
 # :license: See LICENSE.txt.
 
 import os
+import re
 try:
     import json
 except ImportError:
@@ -11,6 +12,9 @@ except ImportError:
 import hou
 
 from .base import Host
+
+
+SHAPE_REGEX = re.compile('Shape(\d+)$')
 
 
 class HoudiniHost(Host):
@@ -24,10 +28,12 @@ class HoudiniHost(Host):
         '''Load *package* onto *target*.
         
         If *target* not specified create an appropriate parent node.
-        
+
+        Return target node.
+
         '''
         if target is None:
-            target = hou.node('/obj').createNode('uk.ltd.4degrees::segue')
+            target = hou.node('/obj').createNode('Segue')
             target.parm('package').set(str(package))
         
         # Clear children
@@ -37,11 +43,21 @@ class HoudiniHost(Host):
         # Load package file
         package_path = target.evalParm('package')
         if not os.path.isfile(package_path):
-            return
-        
+            raise ValueError('Not a valid package: {0}'.format(package_path))
+
         with open(package_path, 'r') as package_file:
             package = json.load(package_file)
-        
+
+        package_root_path = os.path.abspath(os.path.dirname(package_path))
+
+        # Create final output geometry node.
+        output_geometry_node = target.createNode('geo', 'output')
+        output_geometry_node.node('file1').destroy()
+        switch_node = output_geometry_node.createNode(
+            'switch', 'implementation'
+        )
+
+        # Construct default 'unoptimised' implementation.
         cache_relative_path = package.get('cache')
         if not cache_relative_path:
             raise ValueError('No cache specified in package.')
@@ -50,19 +66,15 @@ class HoudiniHost(Host):
         if not reference_relative_path:
             raise ValueError('No reference specified in package.')
         
-        package_root_path = os.path.abspath(os.path.dirname(package_path))
         cache_path = os.path.join(package_root_path, cache_relative_path)
         reference_path = os.path.join(package_root_path,
                                       reference_relative_path)
-        
-        # TODO: Check for 'houdini' attribute which will be bgeo. If found, use
-        # that instead.
 
-        # Create output container
-        geometry_node = target.createNode('geo', 'output')
+        # Create unoptimised output container
+        unoptimised_geometry_node = target.createNode('geo', 'unoptimised')
 
         # Read in reference object
-        reference_node = geometry_node.node('file1')
+        reference_node = unoptimised_geometry_node.node('file1')
         reference_node.setName('reference')
         reference_node.parm('file').set(str(reference_path))
 
@@ -78,7 +90,9 @@ class HoudiniHost(Host):
             if child.type().name() == 'geo':
                 geometry_nodes.append(child)
         
-        merge_node = geometry_node.createNode('object_merge', 'cache')
+        merge_node = unoptimised_geometry_node.createNode(
+            'object_merge', 'cache'
+        )
         merge_node.parm('xformtype').set(1) # Into This Object
         merge_node.parm('numobj').set(len(geometry_nodes))
 
@@ -92,9 +106,7 @@ class HoudiniHost(Host):
 
         for candidate_geometry_node in geometry_nodes:
             candidate_name = candidate_geometry_node.name()
-            if candidate_name.endswith('Shape'):
-                candidate_name = candidate_name[:-5]
-
+            candidate_name = SHAPE_REGEX.sub('\g<1>', candidate_name)
             index = primitive_groups.index(candidate_name)
             parameter_name = 'objpath{0}'.format(index + 1)
             merge_node.parm(parameter_name).set(candidate_geometry_node.path())
@@ -135,7 +147,52 @@ class HoudiniHost(Host):
         reference_node.setRenderFlag(0)
         alembic_node.setDisplayFlag(0)
         group_node.setDisplayFlag(1)
-        
+        unoptimised_geometry_node.setDisplayFlag(0)
+
         # Layout
-        geometry_node.layoutChildren()
+        unoptimised_geometry_node.layoutChildren()
+
+        # Connect to switch.
+        unoptimised_merge_node = output_geometry_node.createNode(
+            'object_merge', 'unoptimised'
+        )
+        unoptimised_merge_node.parm('xformtype').set(1)  # Into This Object
+        unoptimised_merge_node.parm('numobj').set(1)
+        unoptimised_merge_node.parm('objpath1').set(
+            unoptimised_geometry_node.path()
+        )
+
+        switch_node.setNextInput(unoptimised_merge_node)
+
+        # Load and switch to optimised version if available.
+        if 'houdini' in package:
+            bgeo_path = os.path.join(package_root_path, package['houdini'])
+
+            optimised_geometry_node = target.createNode('geo', 'optimised')
+            file_node = optimised_geometry_node.node('file1')
+            file_node.setName('output')
+            file_node.parm('file').set(str(bgeo_path))
+
+            # Flags
+            optimised_geometry_node.setDisplayFlag(0)
+
+            # Layout
+            optimised_geometry_node.layoutChildren()
+
+            # Connect to switch.
+            optimised_merge_node = output_geometry_node.createNode(
+                'object_merge', 'optimised'
+            )
+            optimised_merge_node.parm('xformtype').set(1)  # Into This Object
+            optimised_merge_node.parm('numobj').set(1)
+            optimised_merge_node.parm('objpath1').set(
+                optimised_geometry_node.path()
+            )
+
+            switch_node.setNextInput(optimised_merge_node)
+            switch_node.parm('input').set(1)
+
+        # Layout
+        output_geometry_node.layoutChildren()
         target.layoutChildren()
+        return target

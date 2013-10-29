@@ -159,7 +159,9 @@ class MayaHost(Host):
             # Create package file
             package = {
                 'reference': self._package_path(target, reference_path),
-                'cache': self._package_path(target, cache_path)
+                'cache': self._package_path(target, cache_path),
+                'start': start,
+                'stop': stop
             }
             with open(package_path, 'w') as file_:
                 json.dump(package, file_)
