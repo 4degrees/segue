@@ -14,7 +14,7 @@ import hou
 from .base import Host
 
 
-SHAPE_REGEX = re.compile('Shape(\d+)$')
+SHAPE_REGEX = re.compile('Shape(\d*)$')
 
 
 class HoudiniHost(Host):
