@@ -165,8 +165,14 @@ class HoudiniHost(Host):
         switch_node.setNextInput(obj_abc_merge_node)
 
         # Load and switch to bgeo version if available.
-        if 'houdini' in package:
-            bgeo_path = os.path.join(package_root_path, package['houdini'])
+        bgeo_relative_path = package.get('bgeo')
+
+        if bgeo_relative_path is None:
+            # Backwards compatibility.
+            bgeo_relative_path = package.get('houdini')
+
+        if bgeo_relative_path is not None:
+            bgeo_path = os.path.join(package_root_path, bgeo_relative_path)
 
             bgeo_geometry_node = target.createNode('geo', 'bgeo')
             file_node = bgeo_geometry_node.node('file1')
