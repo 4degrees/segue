@@ -20,7 +20,8 @@ def main(arguments=None):
     subparsers = parser.add_subparsers()
 
     optimise_parser = subparsers.add_parser(
-        'optimise-for', help='Optimise package.'
+        'optimise-for',
+        help='Optimise package. (Deprecated: Use add-format instead)'
     )
     optimise_parser.add_argument('application', choices=['houdini'],
                                  help='Application to optimise package for.')
@@ -28,29 +29,49 @@ def main(arguments=None):
                                  help='Path to package file to optimise.')
     optimise_parser.set_defaults(func=optimise_for)
 
+    add_format_parser = subparsers.add_parser(
+        'add-format', help='Add additional format to package.'
+    )
+    add_format_parser.add_argument('format', choices=['bgeo'],
+                                 help='Format to add to package.')
+    add_format_parser.add_argument('package', type=_valid_package,
+                                 help='Path to package file to optimise.')
+    add_format_parser.set_defaults(func=add_format)
+
     namespace = parser.parse_args(arguments)
     namespace.func(namespace)
 
 
-def optimise_for(namespace):
+def add_format(namespace):
     '''Handle subcommand.'''
-    if namespace.application == 'houdini':
-        optimise_for_houdini(namespace.package)
+    if namespace.format == 'bgeo':
+        add_bgeo_format(namespace.package)
         return
 
     raise ValueError(
-        'Cannot optimise for unsupported package: {0}'
-        .format(namespace.application)
+        'Cannot add unsupported format "{0}" to package.'
+        .format(namespace.format)
     )
 
 
-def optimise_for_houdini(package_path):
-    '''Optimise *package* for use in Houdini by adding bgeo format.'''
+def add_bgeo_format(package_path):
+    '''Add bgeo format to *package*.'''
     with open(package_path, 'r') as package_file:
         package = json.load(package_file)
 
+    # Upgrade old package.
     if 'houdini' in package:
-        print 'Package already optimised for Houdini.'
+        package['bgeo'] = package['houdini']
+        del package['houdini']
+
+        with open(package_path, 'w') as package_file:
+            json.dump(package, package_file)
+
+        print 'Package already contains bgeo format.'
+        return
+
+    if 'bgeo' in package:
+        print 'Package already contains bgeo format.'
         return
 
     start = package['start']
@@ -93,11 +114,23 @@ def optimise_for_houdini(package_path):
     ]
     subprocess.check_call(command)
 
-    package['houdini'] = bgeo_relative_path
+    package['bgeo'] = bgeo_relative_path
     with open(package_path, 'w') as package_file:
         json.dump(package, package_file)
 
-    print 'Optimisation succeeded.'
+    print 'Addition of bgeo format succeeded.'
+
+
+def optimise_for(namespace):
+    '''Handle subcommand.'''
+    if namespace.application == 'houdini':
+        add_bgeo_format(namespace.package)
+        return
+
+    raise ValueError(
+        'Cannot optimise for unsupported package: {0}'
+        .format(namespace.application)
+    )
 
 
 def _valid_package(value):

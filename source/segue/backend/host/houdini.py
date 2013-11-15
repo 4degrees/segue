@@ -57,7 +57,7 @@ class HoudiniHost(Host):
             'switch', 'implementation'
         )
 
-        # Construct default 'unoptimised' implementation.
+        # Construct default obj + abc implementation.
         cache_relative_path = package.get('cache')
         if not cache_relative_path:
             raise ValueError('No cache specified in package.')
@@ -70,11 +70,11 @@ class HoudiniHost(Host):
         reference_path = os.path.join(package_root_path,
                                       reference_relative_path)
 
-        # Create unoptimised output container
-        unoptimised_geometry_node = target.createNode('geo', 'unoptimised')
+        # Create obj + abc output container
+        obj_abc_geometry_node = target.createNode('geo', 'obj-abc')
 
         # Read in reference object
-        reference_node = unoptimised_geometry_node.node('file1')
+        reference_node = obj_abc_geometry_node.node('file1')
         reference_node.setName('reference')
         reference_node.parm('file').set(str(reference_path))
 
@@ -90,7 +90,7 @@ class HoudiniHost(Host):
             if child.type().name() == 'geo':
                 geometry_nodes.append(child)
         
-        merge_node = unoptimised_geometry_node.createNode(
+        merge_node = obj_abc_geometry_node.createNode(
             'object_merge', 'cache'
         )
         merge_node.parm('xformtype').set(1) # Into This Object
@@ -147,49 +147,55 @@ class HoudiniHost(Host):
         reference_node.setRenderFlag(0)
         alembic_node.setDisplayFlag(0)
         group_node.setDisplayFlag(1)
-        unoptimised_geometry_node.setDisplayFlag(0)
+        obj_abc_geometry_node.setDisplayFlag(0)
 
         # Layout
-        unoptimised_geometry_node.layoutChildren()
+        obj_abc_geometry_node.layoutChildren()
 
         # Connect to switch.
-        unoptimised_merge_node = output_geometry_node.createNode(
-            'object_merge', 'unoptimised'
+        obj_abc_merge_node = output_geometry_node.createNode(
+            'object_merge', 'obj-abc'
         )
-        unoptimised_merge_node.parm('xformtype').set(1)  # Into This Object
-        unoptimised_merge_node.parm('numobj').set(1)
-        unoptimised_merge_node.parm('objpath1').set(
-            unoptimised_geometry_node.path()
+        obj_abc_merge_node.parm('xformtype').set(1)  # Into This Object
+        obj_abc_merge_node.parm('numobj').set(1)
+        obj_abc_merge_node.parm('objpath1').set(
+            obj_abc_geometry_node.path()
         )
 
-        switch_node.setNextInput(unoptimised_merge_node)
+        switch_node.setNextInput(obj_abc_merge_node)
 
-        # Load and switch to optimised version if available.
-        if 'houdini' in package:
-            bgeo_path = os.path.join(package_root_path, package['houdini'])
+        # Load and switch to bgeo version if available.
+        bgeo_relative_path = package.get('bgeo')
 
-            optimised_geometry_node = target.createNode('geo', 'optimised')
-            file_node = optimised_geometry_node.node('file1')
+        if bgeo_relative_path is None:
+            # Backwards compatibility.
+            bgeo_relative_path = package.get('houdini')
+
+        if bgeo_relative_path is not None:
+            bgeo_path = os.path.join(package_root_path, bgeo_relative_path)
+
+            bgeo_geometry_node = target.createNode('geo', 'bgeo')
+            file_node = bgeo_geometry_node.node('file1')
             file_node.setName('output')
             file_node.parm('file').set(str(bgeo_path))
 
             # Flags
-            optimised_geometry_node.setDisplayFlag(0)
+            bgeo_geometry_node.setDisplayFlag(0)
 
             # Layout
-            optimised_geometry_node.layoutChildren()
+            bgeo_geometry_node.layoutChildren()
 
             # Connect to switch.
-            optimised_merge_node = output_geometry_node.createNode(
-                'object_merge', 'optimised'
+            bgeo_merge_node = output_geometry_node.createNode(
+                'object_merge', 'bgeo'
             )
-            optimised_merge_node.parm('xformtype').set(1)  # Into This Object
-            optimised_merge_node.parm('numobj').set(1)
-            optimised_merge_node.parm('objpath1').set(
-                optimised_geometry_node.path()
+            bgeo_merge_node.parm('xformtype').set(1)  # Into This Object
+            bgeo_merge_node.parm('numobj').set(1)
+            bgeo_merge_node.parm('objpath1').set(
+                bgeo_geometry_node.path()
             )
 
-            switch_node.setNextInput(optimised_merge_node)
+            switch_node.setNextInput(bgeo_merge_node)
             switch_node.parm('input').set(1)
 
         # Layout
