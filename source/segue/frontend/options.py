@@ -73,17 +73,23 @@ class OptionsWidget(QtGui.QFrame):
     def build(self):
         '''Build and layout the interface.'''
         self.setLayout(QtGui.QGridLayout())
-        
+
+        self.rest_frame_widget = QtGui.QDoubleSpinBox()
+        self.rest_frame_label = QtGui.QLabel('Rest Frame')
+        self.rest_frame_label.setBuddy(self.rest_frame_widget)
+        self.layout().addWidget(self.rest_frame_label, 0, 0)
+        self.layout().addWidget(self.rest_frame_widget, 0, 1)
+
         self.frame_range_label = QtGui.QLabel('Range')
-        self.layout().addWidget(self.frame_range_label, 0, 0)
+        self.layout().addWidget(self.frame_range_label, 1, 0)
         
         self.frame_range_combobox = QtGui.QComboBox()
-        self.layout().addWidget(self.frame_range_combobox, 0, 1)
+        self.layout().addWidget(self.frame_range_combobox, 1, 1)
         
         self.frame_range_group = QtGui.QFrame()
         self.frame_range_group.setLayout(QtGui.QHBoxLayout())
         self.frame_range_group.layout().setContentsMargins(0, 0, 0, 0)
-        self.layout().addWidget(self.frame_range_group, 1, 1)
+        self.layout().addWidget(self.frame_range_group, 2, 1)
         
         self.start_frame_widget = QtGui.QDoubleSpinBox()
         self.start_frame_label = QtGui.QLabel('Start')
@@ -109,8 +115,8 @@ class OptionsWidget(QtGui.QFrame):
         self.processor_widget = QtGui.QComboBox()
         self.processor_label = QtGui.QLabel('Process')
         self.processor_label.setBuddy(self.processor_widget)
-        self.layout().addWidget(self.processor_label, 2, 0)
-        self.layout().addWidget(self.processor_widget, 2, 1)
+        self.layout().addWidget(self.processor_label, 3, 0)
+        self.layout().addWidget(self.processor_widget, 3, 1)
         
         
         self.target_widget = QtGui.QLineEdit()
@@ -122,8 +128,8 @@ class OptionsWidget(QtGui.QFrame):
         self.target_label = QtGui.QLabel('Save To')
         self.target_label.setBuddy(self.target_widget)
         
-        self.layout().addWidget(self.target_label, 3, 0)
-        self.layout().addLayout(self.target_layout, 3, 1)
+        self.layout().addWidget(self.target_label, 4, 0)
+        self.layout().addLayout(self.target_layout, 4, 1)
         
         self.layout().setColumnStretch(0, 0)
         self.layout().setColumnStretch(1, 1)
@@ -134,6 +140,8 @@ class OptionsWidget(QtGui.QFrame):
         
     def post_build(self):
         '''Perform post-build operations.'''
+        self.rest_frame_widget.setValue(1.0)
+
         self.start_frame_widget.setMinimum(-10000.00)
         self.start_frame_widget.setMaximum(10000.00)
         

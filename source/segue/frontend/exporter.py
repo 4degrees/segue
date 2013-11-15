@@ -130,7 +130,8 @@ class ExporterWidget(QtGui.QWidget):
             'target': self.options_widget.target_widget.text(),
             'start': self.options_widget.start_frame_widget.value(),
             'stop': self.options_widget.stop_frame_widget.value(),
-            'step': self.options_widget.step_frame_widget.value()
+            'step': self.options_widget.step_frame_widget.value(),
+            'rest': self.options_widget.rest_frame_widget.value()
         }
         
         # TODO: Can this be decoupled?
