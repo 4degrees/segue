@@ -30,7 +30,11 @@ class Host(object):
     def get_current_frame(self):
         '''Return the current frame.'''
         raise NotImplementedError()
-    
+
+    def set_current_frame(self, frame):
+        '''Set the current frame.'''
+        raise NotImplementedError()
+
     def save(self, target=None):
         '''Save current scene to *target*.
         

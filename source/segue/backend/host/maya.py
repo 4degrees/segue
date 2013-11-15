@@ -53,6 +53,10 @@ class MayaHost(Host):
         '''Return the current frame.'''
         return _call(pymel.core.currentTime)
 
+    def set_current_frame(self, frame):
+        '''Set the current frame.'''
+        return _call(pymel.core.currentTime, frame)
+
     def save(self, target=None):
         '''Save current scene to *target*.
         
@@ -67,7 +71,7 @@ class MayaHost(Host):
         return _call(pymel.core.exportAll, target, force=True)
     
     def save_package(self, selection=None, source=None, target=None,
-             start=None, stop=None, step=1):
+                     start=None, stop=None, step=1, rest=None):
         '''Export *selection* in *source* for frame range to *target*.
         
         *selection* should be a list of ids that can be used to select objects
@@ -83,7 +87,10 @@ class MayaHost(Host):
         *start* and *stop* specify the frame range and *step* the time interval
         in frames at which to sample. If *start* and *stop* are not specified
         the range returned by :py:meth:`get_frame_range` will be used.
-        
+
+        *rest* specifies the frame to use for the rest position (the frame the
+        obj should be exported at). If not set defaults to *start*.
+
         Return the path to the exported folder of data.
         
         '''
@@ -118,7 +125,11 @@ class MayaHost(Host):
             
             if stop is None:
                 stop = range[1]
-            
+
+        # Ensure rest position frame set.
+        if rest is None:
+            rest = start
+
         # Ensure target folder exists
         if target is None:
             target = tempfile.mkdtemp('_segue')
@@ -135,10 +146,16 @@ class MayaHost(Host):
         
         # Need to select nodes for export so maintain current selection if any.
         previous_selection = _call(pymel.core.ls, selection=True)
-        
+
+        # May need to change current frame so also store for resetting later.
+        current_frame = self.get_current_frame()
+
         try:
             _call(pymel.core.select, selection, replace=True)
-    
+
+            # Set to specified frame for obj export.
+            self.set_current_frame(rest)
+
             # Export obj for reference (to preserve groups)
             _call(pymel.core.exportSelected, 
                 reference_path, type='OBJexport', force=True,
@@ -165,7 +182,8 @@ class MayaHost(Host):
                 'reference': self._package_path(target, reference_path),
                 'cache': self._package_path(target, cache_path),
                 'start': start,
-                'stop': stop
+                'stop': stop,
+                'step': step
             }
             with open(package_path, 'w') as file_:
                 json.dump(package, file_)
@@ -174,6 +192,9 @@ class MayaHost(Host):
             # Revert to previous selection
             _call(pymel.core.select, clear=True)
             _call(pymel.core.select, previous_selection, replace=True)
-        
+
+            # Revert current frame
+            self.set_current_frame(current_frame)
+
         return target
     
