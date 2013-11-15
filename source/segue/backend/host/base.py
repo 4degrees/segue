@@ -26,6 +26,10 @@ class Host(object):
     def get_frame_range(self):
         '''Return the current frame range as a tuple of (start, stop).'''
         raise NotImplementedError()
+
+    def get_current_frame(self):
+        '''Return the current frame.'''
+        raise NotImplementedError()
     
     def save(self, target=None):
         '''Save current scene to *target*.
