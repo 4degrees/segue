@@ -42,7 +42,14 @@ class OptionsWidget(QtGui.QFrame):
             self.frame_range_combobox.setCurrentIndex(
                 self.frame_range_combobox.count() - 1
             )
-    
+
+        try:
+            self.host.get_current_frame()
+        except (NotImplementedError, AttributeError):
+            pass
+        else:
+            self.frame_range_combobox.addItem('Set As Current Frame', 'current-frame')
+
     def get_processors(self):
         '''Return current processors.'''
         processors = []
@@ -153,7 +160,15 @@ class OptionsWidget(QtGui.QFrame):
             start, stop = self.host.get_frame_range()
             self.start_frame_widget.setValue(float(start))
             self.stop_frame_widget.setValue(float(stop))
-            
+
+        elif option == 'current-frame':
+            for control in (self.start_frame_widget, self.stop_frame_widget):
+                control.setEnabled(False)
+
+            frame = self.host.get_current_frame()
+            self.start_frame_widget.setValue(float(frame))
+            self.stop_frame_widget.setValue(float(frame))
+
         else:
             for control in (self.start_frame_widget, self.stop_frame_widget):
                 control.setEnabled(True)

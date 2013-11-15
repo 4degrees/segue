@@ -48,7 +48,11 @@ class MayaHost(Host):
             _call(pymel.core.playbackOptions, query=True, minTime=True),
             _call(pymel.core.playbackOptions, query=True, maxTime=True)
         )
-    
+
+    def get_current_frame(self):
+        '''Return the current frame.'''
+        return _call(pymel.core.currentTime)
+
     def save(self, target=None):
         '''Save current scene to *target*.
         
