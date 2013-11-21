@@ -98,18 +98,40 @@ class HoudiniHost(Host):
 
         # Merge must happen in same order as reference object setup.
         # TODO: Is there a better way rather than relying on brittle naming?
-        primitive_groups = []
-        for primitive_group in reference_node.geometry().primGroups():
-            primitive_name = primitive_group.name()
-            if primitive_name != 'default':
-                primitive_groups.append(primitive_name)
+        # First identify all geo in cache by container name to match against
+        # primitive group in reference object.
+        geometry_node_containers = {}
+        for geometry_node in geometry_nodes:
+            path = geometry_node.path()
+            container = path.split('/')[-2]
+            existing = geometry_node_containers.get(container)
+            if existing is not None:
+                raise ValueError(
+                    'Unsupported duplicate container name in hierarchy '
+                    'detected: {0} (from "{1}" and "{2}")'
+                    .format(container, path, existing.path())
+                )
 
-        for candidate_geometry_node in geometry_nodes:
-            candidate_name = candidate_geometry_node.name()
-            candidate_name = SHAPE_REGEX.sub('\g<1>', candidate_name)
-            index = primitive_groups.index(candidate_name)
+            geometry_node_containers[container] = geometry_node
+
+        # Filter primitive groups to only include those that match geometry
+        # whilst maintaining ordering.
+        primitive_group_names = []
+        for primitive_group in reference_node.geometry().primGroups():
+            name = primitive_group.name()
+            if name in geometry_node_containers:
+                primitive_group_names.append(name)
+
+        if len(geometry_node_containers) != len(primitive_group_names):
+            raise ValueError(
+                'Geometry from cache and reference object does not match.'
+            )
+
+        # Now apply merge maintaining correct ordering.
+        for index, name in enumerate(primitive_group_names):
             parameter_name = 'objpath{0}'.format(index + 1)
-            merge_node.parm(parameter_name).set(candidate_geometry_node.path())
+            geometry_node = geometry_node_containers[name]
+            merge_node.parm(parameter_name).set(geometry_node.path())
 
         # Map Alembic animation onto reference geometry
         point_node = reference_node.createOutputNode('point', 'map_points')
