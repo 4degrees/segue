@@ -157,7 +157,7 @@ class MayaHost(Host):
             self.set_current_frame(rest)
 
             # Export obj for reference (to preserve groups)
-            _call(pymel.core.exportSelected, 
+            _call(pymel.core.exportSelected,
                 reference_path, type='OBJexport', force=True,
                 preserveReferences=True,
                 options='groups=1;ptgroups=1;materials=0;smoothing=0;normals=1'
@@ -172,7 +172,6 @@ class MayaHost(Host):
             options.append('-frameRange {0} {1}'.format(start, stop))
             options.append('-step {0}'.format(step))
             options.append('-uvWrite')
-            options.append('-stripNamespaces')
             options.append('-file {0}'.format(cache_path))
             
             _call(pymel.core.AbcExport, verbose=True, jobArg=' '.join(options))
