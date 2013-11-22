@@ -3,7 +3,6 @@
 # :license: See LICENSE.txt.
 
 import os
-import re
 try:
     import json
 except ImportError:
@@ -12,9 +11,6 @@ except ImportError:
 import hou
 
 from .base import Host
-
-
-SHAPE_REGEX = re.compile('Shape(\d*)$')
 
 
 class HoudiniHost(Host):
