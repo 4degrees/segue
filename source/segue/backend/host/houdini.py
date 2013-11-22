@@ -118,11 +118,6 @@ class HoudiniHost(Host):
             if name in geometry_node_containers:
                 primitive_group_names.append(name)
 
-        if len(geometry_node_containers) != len(primitive_group_names):
-            raise ValueError(
-                'Geometry from cache and reference object does not match.'
-            )
-
         # Now apply merge maintaining correct ordering.
         for index, name in enumerate(primitive_group_names):
             parameter_name = 'objpath{0}'.format(index + 1)
