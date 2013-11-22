@@ -1,8 +1,9 @@
-# :coding: utf-8
+﻿# :coding: utf-8
 # :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
 # :license: See LICENSE.txt.
 
 import os
+import errno
 try:
     import json
 except ImportError:
@@ -215,3 +216,77 @@ class HoudiniHost(Host):
         output_geometry_node.layoutChildren()
         target.layoutChildren()
         return target
+
+    def add_format_to_package(self, format, node):
+        '''Add specified *format* to package represented by *node*.
+
+        *node* should be an existing Segue node.
+
+        '''
+        supported_formats = ('bgeo',)
+        if format not in supported_formats:
+            raise ValueError(
+                'Unsupported format {0}. Choose one of {1}.'
+                .format(format, ', '.join(supported_formats))
+            )
+
+        # Load package file
+        package_path = node.evalParm('package')
+        if not os.path.isfile(package_path):
+            raise ValueError('Not a valid package: {0}'.format(package_path))
+
+        with open(package_path, 'r') as package_file:
+            package = json.load(package_file)
+
+        # Upgrade old package.
+        if 'houdini' in package:
+            package['bgeo'] = package['houdini']
+            del package['houdini']
+
+            with open(package_path, 'w') as package_file:
+                json.dump(package, package_file)
+
+        if 'bgeo' in package:
+            answer = hou.ui.displayMessage(
+                'Package already contains bgeo format.\n'
+                'Do you want to regenerate it?',
+                buttons=('Yes', 'No'),
+                default_choice=1
+            )
+            if answer == 1:
+                return
+
+        start = package['start']
+        stop = package['stop']
+
+        root_path = os.path.dirname(package_path)
+        bgeo_path = os.path.join(root_path, 'bgeo', '$FF.bgeo')
+
+        try:
+            os.makedirs(os.path.dirname(bgeo_path))
+        except OSError as error:
+            if error.errno != errno.EEXIST:
+                raise
+
+        if not root_path.endswith(os.sep):
+            root_path += os.sep
+
+        bgeo_relative_path = bgeo_path[len(root_path):].replace(os.sep, '/')
+
+        implementation_node = node.node('output/implementation')
+        if implementation_node is None:
+            raise ValueError('Package is not loaded. Please load first.')
+
+        rop_node = implementation_node.createOutputNode('rop_geometry')
+        rop_node.parm('sopoutput').set(bgeo_path.replace('\\', '/'))
+        rop_node.parm('trange').set(1)
+        rop_node.parm('f1').set(start)
+        rop_node.parm('f2').set(stop)
+        rop_node.render()
+
+        package['bgeo'] = bgeo_relative_path
+        with open(package_path, 'w') as package_file:
+            json.dump(package, package_file)
+
+        hou.ui.displayMessage('Addition of bgeo format succeeded.')
+        node.parm('load').pressButton()
