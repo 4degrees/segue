@@ -90,7 +90,6 @@ class HoudiniHost(Host):
             'object_merge', 'cache'
         )
         merge_node.parm('xformtype').set(1) # Into This Object
-        merge_node.parm('numobj').set(len(geometry_nodes))
 
         # Merge must happen in same order as reference object setup.
         # TODO: Is there a better way rather than relying on brittle naming?
@@ -119,6 +118,7 @@ class HoudiniHost(Host):
                 primitive_group_names.append(name)
 
         # Now apply merge maintaining correct ordering.
+        merge_node.parm('numobj').set(len(primitive_group_names))
         for index, name in enumerate(primitive_group_names):
             parameter_name = 'objpath{0}'.format(index + 1)
             geometry_node = geometry_node_containers[name]
