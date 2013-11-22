@@ -227,7 +227,7 @@ class HoudiniHost(Host):
         if format not in supported_formats:
             raise ValueError(
                 'Unsupported format {0}. Choose one of {1}.'
-                .format(format, ', '.join(supported))
+                .format(format, ', '.join(supported_formats))
             )
 
         # Load package file
