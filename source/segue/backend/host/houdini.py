@@ -246,12 +246,15 @@ class HoudiniHost(Host):
             with open(package_path, 'w') as package_file:
                 json.dump(package, package_file)
 
-            print 'Package already contains bgeo format.'
-            return
-
         if 'bgeo' in package:
-            print 'Package already contains bgeo format.'
-            return
+            answer = hou.ui.displayMessage(
+                'Package already contains bgeo format.\n'
+                'Do you want to regenerate it?',
+                buttons=('Yes', 'No'),
+                default_choice=1
+            )
+            if answer == 1:
+                return
 
         start = package['start']
         stop = package['stop']
@@ -282,5 +285,5 @@ class HoudiniHost(Host):
         with open(package_path, 'w') as package_file:
             json.dump(package, package_file)
 
-        print 'Addition of bgeo format succeeded.'
+        hou.ui.displayMessage('Addition of bgeo format succeeded.')
         node.parm('load').pressButton()
