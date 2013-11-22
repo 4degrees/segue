@@ -274,6 +274,9 @@ class HoudiniHost(Host):
         bgeo_relative_path = bgeo_path[len(root_path):].replace(os.sep, '/')
 
         implementation_node = node.node('output/implementation')
+        if implementation_node is None:
+            raise ValueError('Package is not loaded. Please load first.')
+
         rop_node = implementation_node.createOutputNode('rop_geometry')
         rop_node.parm('sopoutput').set(bgeo_path.replace('\\', '/'))
         rop_node.parm('trange').set(1)
