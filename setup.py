@@ -22,7 +22,7 @@ setup(
     author_email='martin@4degrees.ltd.uk',
     license='Apache License (2.0)',
     long_description=open('README.rst').read(),
-    url='https://bitbucket.org/4degrees/segue',
+    url='https://gitlab.com/4degrees/segue',
     keywords='maya,houdini,transfer,cache'
 )
 
